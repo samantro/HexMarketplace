@@ -72,8 +72,8 @@ export default function CreateItem() {
       const data = JSON.stringify({
         name, description, image: fileUrl
       })
-      alert("uploadToIPFS:beofre TRY name,description,price  = " + name + " " + description + " " + price  + " " + fileUrl);
-      alert("uploadToIPFS:beofre TRY data = " + data);
+      // alert("uploadToIPFS:beofre TRY name,description,price  = " + name + " " + description + " " + price  + " " + fileUrl);
+      // alert("uploadToIPFS:beofre TRY data = " + data);
       //try {
         //alert('faking ipfx')
         /*const added = await client.add(data)
@@ -100,8 +100,8 @@ export default function CreateItem() {
             // const url = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
             // const ImageURL = `https://gateway.pinata.cloud/ipfs/${resFile.data.IpfsHash}`;
             // setFileUrl(url);
-            alert("uploadToIPFS:end of TRY name,description,price  = " + name + " " + description + " " + price  + " " + fileUrl);
-            alert("uploadToIPFS:end of TRY data = " + data);
+            // alert("uploadToIPFS:end of TRY name,description,price  = " + name + " " + description + " " + price  + " " + fileUrl);
+            // alert("uploadToIPFS:end of TRY data = " + data);
             // alert("URL from uploadToIPFS -" + fileUrl)
             return fileUrl;
         } //end of try
@@ -126,8 +126,8 @@ export default function CreateItem() {
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
     let listingFee = await marketPlaceContract.methods.getListingFee().call()
     listingFee = listingFee.toString()
-    alert("url line 69 - " + url)
-    alert("account used for listing " + accounts[0])
+    // alert("url line 69 - " + url)
+    // alert("account used for listing " + accounts[0])
     boredPetsContract.methods.mint(url).send({ from: accounts[0] }).on('receipt', function (receipt) {
         console.log('minted');
         // List the NFT

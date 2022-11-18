@@ -54,7 +54,7 @@ export default function CreatorDashboard() {
     setLoadingState('loaded')
   }
 
-  if (loadingState === 'loaded' && !nfts.length) {
+  if (loadingState === 'loaded' && nfts.length===0) {
     return (<h1 className="py-10 px-20 text-3xl">No NFTs listed</h1>)
   } else {
     return (

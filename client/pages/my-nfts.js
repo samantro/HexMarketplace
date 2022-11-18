@@ -24,7 +24,7 @@ export default function MyAssets() {
     const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, boredPetsContractAddress)
     const accounts = await web3.eth.getAccounts()
     const data = await marketPlaceContract.methods.getMyNfts().call({from: accounts[0]})
-    alert(data);
+    // alert(data);
     const nfts = await Promise.all(data.map(async i => {
       try {
         const tokenURI = await boredPetsContract.methods.tokenURI(i.tokenId).call()
@@ -65,12 +65,12 @@ export default function MyAssets() {
               nfts.map((nft, i) => (
                 <div key={i} className="border shadow rounded-xl overflow-hidden">
                   <img src={nft.image} className="rounded" />
-                  <div className="p-4">
+                  {/* <div className="p-4">
                     <p style={ { height: '64px' } } className="text-2xl font-semibold">{nft.name}</p>
                     <div style={ { height: '70px', overflow: 'hidden' } }>
                       <p className="text-gray-400">{nft.description}</p>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="p-4 bg-black">
                     <p className="text-2xl font-bold text-white">Price - {Web3.utils.fromWei(nft.price, "ether")} Eth</p>
                     <button className="mt-4 w-full bg-teal-400 text-white font-bold py-2 px-12 rounded" onClick={() => listNFT(nft)}>List</button>
