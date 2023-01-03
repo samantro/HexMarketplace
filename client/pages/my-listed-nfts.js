@@ -21,10 +21,10 @@ export default function CreatorDashboard() {
     // Get listed NFTs
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
     const accounts = await web3.eth.getAccounts()
-    console.log("metamask accounts "+accounts[1]);
+    // console.log("metamask accounts "+accounts[1]);
     const listings = await marketPlaceContract.methods.getMyListedNfts().call({from: accounts[0]})
-    console.log("selected account "+accounts[0]);
-    console.log("my listed nfts = " + listings );
+    // console.log("selected account "+accounts[0]);
+    // console.log("my listed nfts = " + listings );
     // Iterate over my listed NFTs and retrieve their metadata
     const nfts = await Promise.all(listings.map(async i => {
       //alert("iterator = " + i);
