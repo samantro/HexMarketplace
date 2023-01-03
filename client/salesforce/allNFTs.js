@@ -9,11 +9,11 @@ function c(params) {
   console.log(params)
 }
 
-async function allNFTs(_address) {
+async function allNFTs() {
     const networkId = await web3.eth.net.getId()
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
     const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
-    const data = await marketPlaceContract.methods.getListedNfts().call({from: _address})
+    const data = await marketPlaceContract.methods.getListedNfts().call()
     // new added 
     c("GET 200 \n allNFTs \n")
     const aNfts = [];
@@ -30,7 +30,7 @@ async function allNFTs(_address) {
             tokenURI: tokenURI
           }
         
-          console.log(nft);
+          // console.log(nft);
           aNfts.push(nft);
           return nft
       }
@@ -42,7 +42,7 @@ async function allNFTs(_address) {
     return aNfts;
 
 }
-// loadNFTs('0xC7268C02d20C0eef02aE7E418C0B5C8a7ACec95a')
+// allNFTs();
 module.exports = {allNFTs}
 
 

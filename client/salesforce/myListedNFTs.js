@@ -42,7 +42,6 @@ async function myListedNFTs(_address) {
 
 }
 
-// loadNFTs('0xC7268C02d20C0eef02aE7E418C0B5C8a7ACec95a')
 module.exports = {myListedNFTs}
 
 
