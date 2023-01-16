@@ -12,8 +12,9 @@ import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
 
 // new stuff
 import axios from 'axios';
-import { contractAddress,PINATA_KEY,PINATA_SECRET } from './config';
 
+const PINATA_KEY = process.env.PINATA_KEY; 
+const PINATA_SECRET = process.env.PINATA_SECRET;
 
 export default function CreateItem() {
   const [fileUrl, setFileUrl] = useState(null)
