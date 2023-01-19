@@ -1,10 +1,8 @@
 import Web3 from 'web3';
 import Web3Modal from 'web3modal';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-
-import Marketplace from '../../contracts/optimism-contracts/Marketplace.json'
-import BoredPetsNFT from '../../contracts/optimism-contracts/BoredPetsNFT.json'
+import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
+import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
 
 export default function Home() {
   const [nfts, setNfts] = useState([])
@@ -26,17 +24,16 @@ export default function Home() {
     const nfts = await Promise.all(listings.map(async (i) => {
       try {
         const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
-        console.log(i.tokenId);
-        const tokenURI = await boredPetsContract.methods.tokenURI(i.tokenId).call()
-        const meta = await axios.get(tokenURI)
-        const nft = {
+        var meta = await boredPetsContract.methods.tokenURI(i.tokenId).call()
+        meta = JSON.parse(meta);
+        
+        let nft = {
           price: i.price,
           tokenId: i.tokenId,
           seller: i.seller,
-          owner: i.buyer,
-          image: meta.data.image,
-          name: meta.data.name,
-          description: meta.data.description,
+          name: meta.name,
+          description: meta.description,
+          image: meta.image
         }
         return nft
       } catch(err) {
@@ -70,14 +67,12 @@ export default function Home() {
               nfts.map((nft, i) => (
                 <div key={i} className="border shadow rounded-xl overflow-hidden">
                   <img src={nft.image} className="rounded" />
-                  {/* <div className="p-4">
-                    <p style={ { height: '64px' } } className="text-2xl font-semibold">{nft.name}</p>
-                    <div style={ { height: '70px', overflow: 'hidden'  } }>
-                      <p className="text-gray-400">{nft.description}</p>
-                    </div>
-                  </div> */}
-                  <div className="p-4 bg-black">
-                    <p className="text-2xl font-bold text-white">{Web3.utils.fromWei(nft.price, "ether")} ETH</p>
+                  <div className="p-4">
+                    <p className="text-2xl font-semibold">{nft.name}</p>
+                    <p className="text-gray-400">{nft.description}</p>
+                  </div>
+                  <div className="p-4 ">
+                    <p className="text-2xl font-bold ">{Web3.utils.fromWei(nft.price, "ether")} ETH</p>
                     <button className="mt-4 w-full bg-teal-400 text-white font-bold py-2 px-12 rounded" onClick={() => buyNft(nft)}>Buy</button>
                   </div>
                 </div>

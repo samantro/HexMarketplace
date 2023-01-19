@@ -1,10 +1,9 @@
 import Web3 from 'web3';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import Web3Modal from 'web3modal';
 
-import Marketplace from '../../contracts/optimism-contracts/Marketplace.json';
-import BoredPetsNFT from '../../contracts/optimism-contracts/BoredPetsNFT.json';
+import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
+import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
 
 export default function CreatorDashboard() {
   const [nfts, setNfts] = useState([])
@@ -21,30 +20,23 @@ export default function CreatorDashboard() {
     // Get listed NFTs
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
     const accounts = await web3.eth.getAccounts()
-    console.log("metamask accounts "+accounts[1]);
     const listings = await marketPlaceContract.methods.getMyListedNfts().call({from: accounts[0]})
-    console.log("selected account "+accounts[0]);
-    console.log("my listed nfts = " + listings );
-    // Iterate over my listed NFTs and retrieve their metadata
+    
     const nfts = await Promise.all(listings.map(async i => {
-      //alert("iterator = " + i);
       try {
-        //alert("loadNfts inside try : price,tokenId,seller....= " + i.price + " " + i.tokenId + " " + i.seller);
         const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
-        const tokenURI = await boredPetsContract.methods.tokenURI(i.tokenId).call();
-        //alert("tokenUri inside the try"+tokenURI);
-        //const meta = await axios.get(tokenURI);
-        //alert("meta.data " + meta.data);
-        //alert("Nfts inside try: image url....= " + meta.data.image);
-        let item = {
+        var meta = await boredPetsContract.methods.tokenURI(i.tokenId).call()
+        meta = JSON.parse(meta);
+        
+        let nft = {
           price: i.price,
           tokenId: i.tokenId,
           seller: i.seller,
-          owner: i.owner,
-          //image: meta.data.image,
-          image: tokenURI,
+          name: meta.name,
+          description: meta.description,
+          image: meta.image
         }
-        return item
+        return nft
       } catch(err) {
         console.log(err)
         return null
@@ -66,8 +58,12 @@ export default function CreatorDashboard() {
               nfts.map((nft, i) => (
                 <div key={i} className="border shadow rounded-xl overflow-hidden">
                   <img src={nft.image} className="rounded" />
-                  <div className="p-4 bg-black">
-                    <p className="text-2xl font-bold text-white">Price - {Web3.utils.fromWei(nft.price, "ether")} Eth</p>
+                  <div className="p-4">
+                    <p className="text-2xl font-semibold">{nft.name}</p>
+                    <p className="text-gray-400">{nft.description}</p>
+                  </div>
+                  <div className="p-4">
+                    <p className="text-2xl font-bold">{Web3.utils.fromWei(nft.price, "ether")} Eth</p>
                   </div>
                 </div>
               ))
