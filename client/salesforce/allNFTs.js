@@ -6,9 +6,9 @@ const axios = require('axios')
 
 var web3 = new Web3('https://rpc-mumbai.maticvigil.com')
 
-async function c(params) {
-  console.log(await params)
-}
+// async function c(params) {
+//   console.log(await params)
+// }
 
 async function allNFTs() {
     const networkId = await web3.eth.net.getId()
@@ -39,7 +39,7 @@ async function allNFTs() {
     return nfts;
 
 }
-c(allNFTs())
+// c(allNFTs())
 module.exports = {allNFTs}
 
 

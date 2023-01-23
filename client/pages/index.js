@@ -3,12 +3,28 @@ import Web3Modal from 'web3modal';
 import { useEffect, useState } from 'react';
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
 import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
+import {allNFTs} from '../salesforce/allNFTs'
+
+const btn = {
+  border: '2px solid black',
+  borderRadius: "5px",
+  fontWeight: "700",
+  backgroundColor:"skyblue",
+  margin:"15px",
+  padding:"5px"
+}
 
 export default function Home() {
   const [nfts, setNfts] = useState([])
   const [loadingState, setLoadingState] = useState('not-loaded')
+  const [metamask, setMetamask] = useState();
 
-  useEffect(() => { loadNFTs() }, [])
+  async function noLoginNFTs() {
+    const nfts = await allNFTs();
+    setNfts(nfts);
+    setNfts(nfts.filter(nft => nft !== null))
+    setLoadingState('loaded')
+  }
 
   async function loadNFTs() {
     const web3Modal = new Web3Modal()
@@ -56,9 +72,25 @@ export default function Home() {
     loadNFTs()
   }
 
+  useEffect(() => {
+    if(window.ethereum) 
+      loadNFTs()
+    else {
+      setMetamask(false);
+      if(window.confirm('Install Metamask extension for complete experience.')) {
+        window.open('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn', '_blank');
+      }
+      else {
+        noLoginNFTs();
+      }
+    }
+  },[])
+
   if (loadingState === 'loaded' && !nfts.length) {
+    console.log("if")
     return (<h1 className="px-20 py-10 text-3xl">No pets available!</h1>)
   } else {
+    console.log("else")
     return (
       <div className="flex justify-center">
         <div className="px-4" style={ { maxWidth: '1600px' } }>
@@ -66,7 +98,7 @@ export default function Home() {
             {
               nfts.map((nft, i) => (
                 <div key={i} className="border shadow rounded-xl overflow-hidden">
-                  <img src={nft.image} className="rounded" />
+                  <img src={nft.image} className="rounded" style={{height:'21rem'}}/>
                   <div className="p-4">
                     <p className="text-2xl font-semibold">{nft.name}</p>
                     <p className="text-gray-400">{nft.description}</p>
