@@ -15,7 +15,7 @@ async function listedNFTs(_address) {
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
     const data = await marketPlaceContract.methods.getMyNfts().call({from: _address})
     // c(data)
-    const nfts = await Promise.all(data.map(async (i) => {
+    var nfts = await Promise.all(data.map(async (i) => {
       try {
         const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
         var meta = await boredPetsContract.methods.tokenURI(i.tokenId).call()
@@ -35,6 +35,7 @@ async function listedNFTs(_address) {
         return null
       }
     }))
+    nfts = nfts.filter(nft => nft !== null)
     return nfts;
 }
 c(listedNFTs('0xC7268C02d20C0eef02aE7E418C0B5C8a7ACec95a'))

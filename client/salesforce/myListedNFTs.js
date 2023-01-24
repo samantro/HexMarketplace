@@ -16,7 +16,7 @@ async function myListedNFTs(_address) {
     const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
     const data = await marketPlaceContract.methods.getMyListedNfts().call({from: _address})
     
-    const nfts = await Promise.all(data.map(async i => {
+    var nfts = await Promise.all(data.map(async i => {
       try {
         var meta = await boredPetsContract.methods.tokenURI(i.tokenId).call()
         meta = JSON.parse(meta);
@@ -36,6 +36,7 @@ async function myListedNFTs(_address) {
         return null
       }
     }))
+    nfts = nfts.filter(nft => nft !== null)
     return nfts;
 }
 
