@@ -1,9 +1,7 @@
 import Web3 from 'web3';
-import { useEffect, useState } from 'react';
 import Web3Modal from 'web3modal';
-
+import { useEffect, useState } from 'react';
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
 
 export default function CreatorDashboard() {
   const [nfts, setNfts] = useState([])
@@ -24,8 +22,7 @@ export default function CreatorDashboard() {
     
     const nfts = await Promise.all(listings.map(async i => {
       try {
-        const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
-        var meta = await boredPetsContract.methods.tokenURI(i.tokenId).call()
+        var meta = await  marketPlaceContract.methods.tokenURI(i.tokenId).call()
         meta = JSON.parse(meta);
         
         let nft = {

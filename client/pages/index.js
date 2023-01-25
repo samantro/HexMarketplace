@@ -1,9 +1,8 @@
 import Web3 from 'web3';
 import Web3Modal from 'web3modal';
+import {allNFTs} from '../salesforce/allNFTs'
 import { useEffect, useState } from 'react';
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
-import {allNFTs} from '../salesforce/allNFTs'
 
 const btn = {
   border: '2px solid black',
@@ -39,8 +38,8 @@ export default function Home() {
     // Iterate over the listed NFTs and retrieve their metadata
     const nfts = await Promise.all(listings.map(async (i) => {
       try {
-        const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
-        var meta = await boredPetsContract.methods.tokenURI(i.tokenId).call()
+        var meta = await marketPlaceContract.methods.tokenURI(i.tokenId).call()
+
         meta = JSON.parse(meta);
         
         let nft = {
@@ -68,7 +67,7 @@ export default function Home() {
     const networkId = await web3.eth.net.getId();
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address);
     const accounts = await web3.eth.getAccounts();
-    await marketPlaceContract.methods.buyNft(BoredPetsNFT.networks[networkId].address, nft.tokenId).send({ from: accounts[0], value: nft.price });
+    await marketPlaceContract.methods.buyNft(nft.tokenId).send({ from: accounts[0], value: nft.price });
     loadNFTs()
   }
 
@@ -88,7 +87,7 @@ export default function Home() {
 
   if (loadingState === 'loaded' && !nfts.length) {
     console.log("if")
-    return (<h1 className="px-20 py-10 text-3xl">No pets available!</h1>)
+    return (<h1 className="px-20 py-10 text-3xl" style={{textAlign:"center",color:"grey"}}> No NFT available!</h1>)
   } else {
     console.log("else")
     return (

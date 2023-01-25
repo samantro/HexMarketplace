@@ -1,11 +1,8 @@
 import Web3 from 'web3';
-import { useEffect, useState } from 'react'
-import axios from 'axios'
 import Web3Modal from 'web3modal'
 import { useRouter } from 'next/router'
-
+import { useEffect, useState } from 'react'
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import BoredPetsNFT from '../contracts/ethereum-contracts/BoredPetsNFT.json'
 
 export default function MyAssets() {
   const [nfts, setNfts] = useState([])
@@ -20,15 +17,12 @@ export default function MyAssets() {
     const web3 = new Web3(provider)
     const networkId = await web3.eth.net.getId()
     const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
-    const boredPetsContractAddress = BoredPetsNFT.networks[networkId].address
-    const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, boredPetsContractAddress)
     const accounts = await web3.eth.getAccounts()
     const data = await marketPlaceContract.methods.getMyNfts().call({from: accounts[0]})
     // alert(data);
     const nfts = await Promise.all(data.map(async i => {
       try {
-        const boredPetsContract = new web3.eth.Contract(BoredPetsNFT.abi, BoredPetsNFT.networks[networkId].address)
-        var meta = await boredPetsContract.methods.tokenURI(i.tokenId).call()
+        var meta = await marketPlaceContract.methods.tokenURI(i.tokenId).call()
         meta = JSON.parse(meta);
         
         let nft = {

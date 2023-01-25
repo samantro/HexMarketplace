@@ -68,7 +68,7 @@ module.exports = {
     // UNCOMMENT TO USE GOERLI NETWORK
     // Currently, VSCode Extension debugger fails with "truffle-config.js" has incorrect format
     // due to the usage of HDWalletProvider
-    matic: {
+    development: {
       provider: () => new HDWalletProvider(goerliMnemonic, `https://rpc-mumbai.maticvigil.com`),
       network_id: 80001,
       confirmations: 2,
