@@ -3,15 +3,8 @@ import Web3Modal from 'web3modal';
 import {allNFTs} from '../salesforce/allNFTs'
 import { useEffect, useState } from 'react';
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
+import Footer from './footer';
 
-const btn = {
-  border: '2px solid black',
-  borderRadius: "5px",
-  fontWeight: "700",
-  backgroundColor:"skyblue",
-  margin:"15px",
-  padding:"5px"
-}
 
 export default function Home() {
   const [nfts, setNfts] = useState([])
@@ -85,33 +78,35 @@ export default function Home() {
     }
   },[])
 
+
   if (loadingState === 'loaded' && !nfts.length) {
-    console.log("if")
     return (<h1 className="px-20 py-10 text-3xl" style={{textAlign:"center",color:"grey"}}> No NFT available!</h1>)
   } else {
-    console.log("else")
     return (
-      <div className="flex justify-center">
-        <div className="px-4" style={ { maxWidth: '1600px' } }>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+      <>
+        <div className="flex justify-center bg-slate-100 pb-20">
+          <div className="px-4" style={ { maxWidth: '1600px' } }>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-5">
             {
               nfts.map((nft, i) => (
-                <div key={i} className="border shadow rounded-xl overflow-hidden">
-                  <img src={nft.image} className="rounded" style={{height:'21rem'}}/>
+                <div key={i} className="border shadow rounded-xl overflow-hidden bg-white scale-95 hover:scale-105">
+                  <img src={nft.image} className="rounded" style={{height:'18rem'}}/>
                   <div className="p-4">
                     <p className="text-2xl font-semibold">{nft.name}</p>
-                    <p className="text-gray-400">{nft.description}</p>
-                  </div>
-                  <div className="p-4 ">
-                    <p className="text-2xl font-bold ">{Web3.utils.fromWei(nft.price, "ether")} ETH</p>
-                    <button className="mt-4 w-full bg-teal-400 text-white font-bold py-2 px-12 rounded" onClick={() => buyNft(nft)}>Buy</button>
+                    <p className="text-blue-400 text-xl">{nft.description}</p>
+                    <button className="mt-4 w-full bg-sky-400 hover:bg-sky-600 text-white font-bold py-2 px-12 rounded" 
+                        onClick={() => buyNft(nft)}>
+                        {Web3.utils.fromWei(nft.price, "ether")} ETH
+                    </button>
                   </div>
                 </div>
               ))
             }
+            </div>
           </div>
         </div>
-      </div>
+        <Footer />
+      </>
     )
   }
 }

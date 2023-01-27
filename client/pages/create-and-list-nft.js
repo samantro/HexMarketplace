@@ -4,6 +4,7 @@ import Web3Modal from 'web3modal'
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
+import Footer from './footer';
 
 
 export default function CreateItem() {
@@ -25,8 +26,8 @@ export default function CreateItem() {
             url: "https://api.pinata.cloud/pinning/pinFileToIPFS",
             data: formData,
             headers:{
-                'pinata_api_key':"607173263386f6d53c24",
-                'pinata_secret_api_key':"88ee99660f736fb8f041f9f5187b381d2dc252eae628db96a7b7338c33f0a493",
+                'pinata_api_key':"0f2d063de18c8634c174",
+                'pinata_secret_api_key':"64114ac2fb9e8870955f3f05cec9f176d56050235a369bce5b225243cea53760",
                 'Content-Type':'multipart/form-data'
             },
         });
@@ -78,21 +79,22 @@ export default function CreateItem() {
   }
 
   return (
-    <div className="flex justify-center">
+    <>
+    <div className="flex justify-center bg-slate-100">
       <div className="w-1/2 flex flex-col pb-12">
         <input 
           placeholder="Asset Name"
-          className="mt-8 border rounded p-4"
+          className="mt-10 mb-5 border rounded p-4"
           onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
         />
         <textarea
           placeholder="Asset Description"
-          className="mt-2 border rounded p-4"
+          className="mb-5 border rounded p-4 h-40"
           onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
         />
         <input
           placeholder="Asset Price in Eth"
-          className="mt-2 border rounded p-4"
+          className="border rounded p-4"
           onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
         />
         {
@@ -112,6 +114,8 @@ export default function CreateItem() {
         </button>
       </div>
     </div>
+    <Footer />
+    </>
   )
 }
 

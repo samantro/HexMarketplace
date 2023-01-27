@@ -3,6 +3,7 @@ import Web3Modal from 'web3modal'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
+import Footer from './footer';
 
 export default function MyAssets() {
   const [nfts, setNfts] = useState([])
@@ -45,34 +46,36 @@ export default function MyAssets() {
   }
 
   function listNFT(nft) {
-    router.push(`/resell-nft?id=${nft.tokenId}&tokenURI=${nft.tokenURI}`)
+    router.push(`/resell-nft?id=${nft.tokenId}&image=${nft.image}`)
   }
 
+ 
   if (loadingState === 'loaded' && !nfts.length) {
-    return (<h1 className="py-10 px-20 text-3xl">No NFTs owned</h1>);
+    return (<h1 className="px-20 py-10 text-3xl" style={{textAlign:"center",color:"grey"}}> No NFT Owned!</h1>)
   } else {
     return (
-      <div className="flex justify-center">
-        <div className="p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+      <>
+        <div className="flex justify-center bg-slate-100 pb-20">
+          <div className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
             {
               nfts.map((nft, i) => (
-                <div key={i} className="border shadow rounded-xl overflow-hidden">
-                  <img src={nft.image} className="rounded" />
+                <div key={i} className="border shadow rounded-xl overflow-hidden bg-white">
+                  <img src={nft.image} className="rounded" style={{height:'18rem'}}/>
                   <div className="p-4">
                     <p className="text-2xl font-semibold">{nft.name}</p>
-                    <p className="text-gray-400">{nft.description}</p>
-                  </div>
-                  <div className="p-4">
-                    <p className="text-2xl font-bold">Price - {Web3.utils.fromWei(nft.price, "ether")} Eth</p>
-                    <button className="mt-4 w-full bg-teal-400 text-white font-bold py-2 px-12 rounded" onClick={() => listNFT(nft)}>List</button>
+                    <p className="text-blue-400 text-xl">{nft.description}</p>
+                    <p className="text-2xl font-bold">Price : {Web3.utils.fromWei(nft.price, "ether")} ETH</p>
+                    <button className="mt-4 w-full bg-sky-400 hover:bg-sky-600 text-white font-bold py-2 px-12 rounded" onClick={() => listNFT(nft)}>List</button>
                   </div>
                 </div>
               ))
             }
+            </div>
           </div>
         </div>
-      </div>
+        <Footer />
+      </>
     );
   }
 }
