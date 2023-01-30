@@ -5,19 +5,21 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
 import Footer from './footer';
+import LoaderComponent from './loader';
 
 
 export default function CreateItem() {
   const [nftUrl, setNftUrl] = useState(null)
   const [loading, setLoading] = useState(false);
   const [formInput, updateFormInput] = useState({ price: '', name: '', description: '' })
+  const [fileName, setFileName] = useState('Select Image file');
   const router = useRouter()
   
 
   // upload image to IPFS
   async function onChange(e) {
     const file = e.target.files[0]
-
+    setFileName(file.name);
     try{
         const formData = new FormData();
         formData.append("file",file);
@@ -36,7 +38,8 @@ export default function CreateItem() {
     } //end of try
 
     catch (error) {
-      console.log('Error uploading file: ', error)
+
+      console.log('Error uploading file: ', error.message)
       alert ("!!!!! Error in on change - " + error)
     }  
   }
@@ -52,12 +55,13 @@ export default function CreateItem() {
   }
 
   async function listNFTForSale() {
+    // const url = await uploadToIPFS();
+    const url="";
+    // if(url=="") {
+    //   alert('Please Upload your NFT image.')
+    //   return;
+    // }
     setLoading(true);
-    const url = await uploadToIPFS();
-    if(url=="") {
-      alert('Please Upload your NFT image.')
-      return;
-    }
     const price = Web3.utils.toWei(formInput.price, "ether")
 
     const web3Modal = new Web3Modal()
@@ -75,38 +79,56 @@ export default function CreateItem() {
     .send({ from: accounts[0], value: listingFee }).on('receipt', function () {
         console.log('listed')
         router.push('/')
-    });
+    })
+    .on('error', (err)=> {
+      const msg = "MetaMask Tx Signature: User denied transaction signature.";
+      if(err.message==msg) {
+        setLoading(false);
+      }
+    })
   }
 
+if(loading) {
+  return LoaderComponent();
+}
   return (
     <>
     <div className="flex justify-center bg-slate-100">
-      <div className="w-1/2 flex flex-col pb-12">
+      <div className="w-1/2 flex flex-col pt-2">
+        <div className='m-auto'>
+          {
+            nftUrl && (
+              <img className="rounded mt-4" width="350" src={nftUrl} />
+            )
+          }
+          <label htmlFor='file' className='mt-2 mb-2' style={{display: "block",textAlign: "center"}}>{fileName}</label>
+          <input
+            type="file"
+            name="Asset"
+            id='file'
+            className="my-4 ml-20"
+            style={{display: "none"}}
+            accept="image/*"
+            onChange={onChange}
+          />
+        </div>
         <input 
           placeholder="Asset Name"
-          className="mt-10 mb-5 border rounded p-4"
+          value={formInput.name}
+          className="mt-2 mb-5 border rounded p-4"
           onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
         />
         <textarea
           placeholder="Asset Description"
+          value={formInput.description}
           className="mb-5 border rounded p-4 h-40"
           onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
         />
         <input
           placeholder="Asset Price in Eth"
+          value={formInput.price}
           className="border rounded p-4"
           onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
-        />
-        {
-          nftUrl && (
-            <img className="rounded mt-4" width="350" src={nftUrl} />
-          )
-        }
-        <input
-          type="file"
-          name="Asset"
-          className="my-4"
-          onChange={onChange}
         />
         
         <button disable={loading} onClick={listNFTForSale} className="font-bold mt-4 bg-teal-400 text-white rounded p-4 shadow-lg">

@@ -3,10 +3,11 @@ import Web3Modal from 'web3modal';
 import { useEffect, useState } from 'react';
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
 import Footer from './footer';
+import LoaderComponent from './loader';
 
 export default function CreatorDashboard() {
   const [nfts, setNfts] = useState([])
-  const [loadingState, setLoadingState] = useState('not-loaded')
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { loadNFTs() }, [])
 
@@ -41,11 +42,14 @@ export default function CreatorDashboard() {
       }
     }))
     setNfts(nfts.filter(nft => nft !== null))
-    setLoadingState('loaded')
+    setLoading(false)
   }
 
-
-  if (loadingState === 'loaded' && !nfts.length) {
+  if(loading) {
+    return LoaderComponent();
+  }
+  else
+  if (!nfts.length) {
     return (<h1 className="px-20 py-10 text-3xl bg-slate-100" style={{textAlign:"center",color:"grey"}}> No NFT Listed!</h1>)
   } else {
     return (

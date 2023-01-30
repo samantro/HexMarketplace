@@ -4,10 +4,11 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
 import Footer from './footer';
+import LoaderComponent from './loader';
 
 export default function MyAssets() {
   const [nfts, setNfts] = useState([])
-  const [loadingState, setLoadingState] = useState('not-loaded')
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => { loadNFTs() }, [])
@@ -42,15 +43,18 @@ export default function MyAssets() {
 
     }))
     setNfts(nfts.filter(nft => nft !== null))
-    setLoadingState('loaded')
+    setLoading(false)
   }
 
   function listNFT(nft) {
     router.push(`/resell-nft?id=${nft.tokenId}&image=${nft.image}`)
   }
 
- 
-  if (loadingState === 'loaded' && !nfts.length) {
+  if(loading) {
+    return LoaderComponent();
+  }
+  else
+  if (!nfts.length) {
     return (<h1 className="px-20 py-10 text-3xl" style={{textAlign:"center",color:"grey"}}> No NFT Owned!</h1>)
   } else {
     return (
