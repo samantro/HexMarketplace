@@ -10,73 +10,48 @@ import LoaderComponent from './loader';
 export default function Home() {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [metamask, setMetamask] = useState();
-
-  async function noLoginNFTs() {
-    const nfts = await allNFTs();
-    setNfts(nfts);
-    setNfts(nfts.filter(nft => nft !== null))
-    setLoading(false)
+  const [isLogin, setIsLogin] = useState(false);
+  var web3=false;
+  
+  async function login() {
+    // try {
+      // if(window.ethereum) {
+        setIsLogin(window.ethereum._state.accounts>0);
+        if(!isLogin){
+          const web3Modal = new Web3Modal()
+          const provider = await web3Modal.connect()
+          web3 = new Web3(provider)
+          setIsLogin(window.ethereum._state.accounts>0);
+        }
+      // }
+    // } catch(e) {
+      // alert('Rejected: Metamask Login')
+    // }
   }
 
   async function loadNFTs() {
-    const web3Modal = new Web3Modal()
-    const provider = await web3Modal.connect()
-    const web3 = new Web3(provider)
-    const networkId = await web3.eth.net.getId()
-    console.log(networkId);
-
-    // Get all listed NFTs
-    const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
-    const listings = await marketPlaceContract.methods.getListedNfts().call()
-    // Iterate over the listed NFTs and retrieve their metadata
-    const nfts = await Promise.all(listings.map(async (i) => {
-      try {
-        var meta = await marketPlaceContract.methods.tokenURI(i.tokenId).call()
-
-        meta = JSON.parse(meta);
-        
-        let nft = {
-          price: i.price,
-          tokenId: i.tokenId,
-          seller: i.seller,
-          name: meta.name,
-          description: meta.description,
-          image: meta.image
-        }
-        return nft
-      } catch(err) {
-        console.log(err)
-        return null
-      }
-    }))
+    const nfts = await allNFTs();
     setNfts(nfts.filter(nft => nft !== null))
     setLoading(false)
   }
 
   async function buyNft(nft) {
-    const web3Modal = new Web3Modal()
-    const provider = await web3Modal.connect()
-    const web3 = new Web3(provider)
-    const networkId = await web3.eth.net.getId();
-    const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address);
-    const accounts = await web3.eth.getAccounts();
-    await marketPlaceContract.methods.buyNft(nft.tokenId).send({ from: accounts[0], value: nft.price });
-    loadNFTs()
+    if(isLogin) {
+      const web3Modal = new Web3Modal()
+      const provider = await web3Modal.connect()
+      const web3 = new Web3(provider)
+      const networkId = await web3.eth.net.getId();
+      const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address);
+      const accounts = await web3.eth.getAccounts();
+      await marketPlaceContract.methods.buyNft(nft.tokenId).send({ from: accounts[0], value: nft.price })
+    }
+    else {
+      alert("Please Connect to Metamask")
+    }
   }
 
   useEffect(() => {
-    if(window.ethereum) 
-      loadNFTs()
-    else {
-      setMetamask(false);
-      if(window.confirm('Install Metamask extension for complete experience.')) {
-        window.open('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn', '_blank');
-      }
-      else {
-        noLoginNFTs();
-      }
-    }
+    loadNFTs()
   },[])
 
 if(loading) {
@@ -84,11 +59,24 @@ if(loading) {
 }
 else
   if(!nfts.length) {
-    return (<h1 className="px-20 py-10 text-3xl" style={{textAlign:"center",color:"grey"}}> No NFT available!</h1>)
-  } else {
+    return (<div><h1 className="px-20 py-10 text-3xl" style={{textAlign:"center",color:"grey"}}> No NFT available!</h1><Footer /></div>)
+  } 
+  else {
     return (
       <>
-        <div className="flex justify-center bg-slate-100 pb-20">
+        <div className='text-center'>
+          {(isLogin) ? 
+            <div className="font-bold text-slate-500 rounded" style={{position:"absolute",left:"410px",top:"30px"}}>🟢Connected</div>
+            :<div className='border shadow rounded-xl overflow-hidden m-auto mt-1' style={{width:"800px"}}>
+              <h1 className="px-20 py-2 text-2xl" style={{textAlign:"center",color:"red"}}>You are not connected to Metamask, Please
+                <div style={{display:"inline", color:"blue"}} onClick={login}> connect</div>
+              </h1>
+              <div style={{position:"absolute",left:"410px",top:"30px"}} className="font-bold rounded hover:bg-teal-200">🔴Connect</div>
+            </div>
+          }
+        </div>
+        
+        <div className="flex justify-center bg-slate-100 pb-15 mt-5">
           <div className="px-4" style={ { maxWidth: '1600px' } }>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-5">
             {
