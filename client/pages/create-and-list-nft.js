@@ -1,20 +1,36 @@
 import Web3 from 'web3'
 import axios from 'axios';
 import Web3Modal from 'web3modal'
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import Footer from './footer';
-import LoaderComponent from './loader';
+import Modal from '../components/modal';
 
 
 export default function CreateItem() {
   const [nftUrl, setNftUrl] = useState(null)
   const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
+  const [metamask, setMetamask] = useState(false);
   const [formInput, updateFormInput] = useState({ price: '', name: '', description: '' })
   const [fileName, setFileName] = useState('Select Image file');
   const router = useRouter()
   
+  async function login() {
+    if(!window.ethereum) {
+      if(window.confirm('Please install Metamask to login')) {
+        window.open('https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn?hl=en');
+      }return;
+    }
+    if(window.ethereum) {
+      const web3Modal = new Web3Modal()
+      await web3Modal.connect()
+      window.ethereum.request({method: 'eth_accounts'}).then((accounts)=> {
+        if(accounts.length)
+          setIsLogin(true)
+      })
+    }
+  } 
 
   // upload image to IPFS
   async function onChange(e) {
@@ -44,23 +60,27 @@ export default function CreateItem() {
     }  
   }
 
-  async function uploadToIPFS() {
+  function uploadToIPFS() {
     const { name, description, price } = formInput
     if (!name || !description || !price) {
-      return "";
-    } else {
+      alert('Please fill all input.')
+      return false;
+    }
+    else if (!nftUrl) {
+      alert('Please Upload your NFT image.')
+      return false;
+    }
+    else {
       const data = JSON.stringify({name,description,image: nftUrl})
       return data;
     }
   }
 
   async function listNFTForSale() {
-    // const url = await uploadToIPFS();
-    const url="";
-    // if(url=="") {
-    //   alert('Please Upload your NFT image.')
-    //   return;
-    // }
+    const data = uploadToIPFS();
+    if(!data) {
+      return;
+    }
     setLoading(true);
     const price = Web3.utils.toWei(formInput.price, "ether")
 
@@ -75,7 +95,7 @@ export default function CreateItem() {
     let listingFee = await marketPlaceContract.methods.getListingFee().call()
     listingFee = listingFee.toString()
 
-    marketPlaceContract.methods.listNft(url, price)
+    marketPlaceContract.methods.listNft(data, price)
     .send({ from: accounts[0], value: listingFee }).on('receipt', function () {
         console.log('listed')
         router.push('/')
@@ -88,56 +108,100 @@ export default function CreateItem() {
     })
   }
 
-if(loading) {
-  return LoaderComponent();
-}
-  return (
-    <>
-    <div className="flex justify-center bg-slate-100">
-      <div className="w-1/2 flex flex-col pt-2">
-        <div className='m-auto'>
-          {
-            nftUrl && (
-              <img className="rounded mt-4" width="350" src={nftUrl} />
-            )
-          }
-          <label htmlFor='file' className='mt-2 mb-2' style={{display: "block",textAlign: "center"}}>{fileName}</label>
-          <input
-            type="file"
-            name="Asset"
-            id='file'
-            className="my-4 ml-20"
-            style={{display: "none"}}
-            accept="image/*"
-            onChange={onChange}
-          />
-        </div>
-        <input 
-          placeholder="Asset Name"
-          value={formInput.name}
-          className="mt-2 mb-5 border rounded p-4"
-          onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
-        />
-        <textarea
-          placeholder="Asset Description"
-          value={formInput.description}
-          className="mb-5 border rounded p-4 h-40"
-          onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
-        />
-        <input
-          placeholder="Asset Price in Eth"
-          value={formInput.price}
-          className="border rounded p-4"
-          onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
-        />
-        
-        <button disable={loading} onClick={listNFTForSale} className="font-bold mt-4 bg-teal-400 text-white rounded p-4 shadow-lg">
-          MINT & LIST NFT
-        </button>
+
+  useEffect(() => {
+    if(window.ethereum) {
+      setMetamask(true);
+      window.ethereum.request({method: 'eth_accounts'}).then(async (accounts)=> {
+        if(accounts.length) {
+          setIsLogin(true)
+        }
+      })
+    }
+  },[])
+
+if(metamask) {
+  if(isLogin) {
+    return (
+      <>
+      <div className='text-center'>
+        <div className="font-bold text-slate-500 rounded" style={{position:"absolute",left:"5px",top:"25px"}}>🟢</div>
       </div>
+      <div className="flex justify-center bg-slate-100">
+        <div className="w-1/2 flex flex-col pt-2">
+          <div className='m-auto'>
+            {
+              nftUrl && (
+                <img className="rounded mt-4" width="350" src={nftUrl} />
+              )
+            }
+            <label htmlFor='file' className='mt-2 mb-2' style={{display: "block",textAlign: "center"}}>{fileName}</label>
+            <input
+              type="file"
+              name="Asset"
+              id='file'
+              className="my-4 ml-20"
+              style={{display: "none"}}
+              accept="image/*"
+              onChange={onChange}
+            />
+          </div>
+          <input 
+            placeholder="Asset Name"
+            value={formInput.name}
+            className="mt-2 mb-5 border rounded p-4"
+            onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
+          />
+          <textarea
+            placeholder="Asset Description"
+            value={formInput.description}
+            className="mb-5 border rounded p-4 h-40"
+            onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
+          />
+          <input
+            placeholder="Asset Price in Eth"
+            value={formInput.price}
+            className="border rounded p-4"
+            onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
+          />
+          
+          <button disable={loading} onClick={listNFTForSale} className="font-bold mt-4 bg-teal-400 text-white rounded p-4 shadow-lg">
+            MINT & LIST NFT
+          </button>
+        </div>
+        {loading && Modal()}
+      </div>
+      </>
+  )}
+
+  else {
+    return <div>
+      <div className='text-center'>
+        <div className='border shadow rounded-xl overflow-hidden m-auto mt-1' style={{width:"800px"}}>
+            <h1 className="px-20 py-2 text-2xl" style={{textAlign:"center",color:"red"}}>You are not connected to Metamask
+              <button className="m-auto mt-2 block bg-sky-400 hover:bg-sky-600 text-white py-1 px-4 rounded" onClick={login}> Connect</button>
+            </h1>
+            <div style={{position:"absolute",left:"5px",top:"25px"}} className="font-bold rounded hover:bg-teal-200">🔴</div>
+          </div>
+        </div>
     </div>
-    <Footer />
-    </>
-  )
+  }
+}
+else {
+  return <div>
+    <div className='text-center'>
+      <div className='border shadow rounded-xl overflow-hidden m-auto mt-1' style={{width:"800px"}}>
+          <h1 className="px-20 py-2 text-2xl" style={{textAlign:"center",color:"red"}}>
+            <div>Please add
+              <a className='hover:underline inline text-blue-700' target='_blank'
+              href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn"> MetaMask </a> extension to your browser.
+            </div>
+          </h1>
+          <div style={{position:"absolute",left:"5px",top:"25px"}} className="font-bold rounded hover:bg-teal-200">🔴</div>
+        </div>
+      </div>
+  </div>
+}
+
 }
 

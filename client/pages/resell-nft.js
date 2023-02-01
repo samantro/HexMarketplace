@@ -4,12 +4,21 @@ import Web3Modal from 'web3modal'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import Footer from './footer'
 
 export default function ResellNFT() {
   const [price,setPrice] = useState(0);
+  const [isLogin, setIsLogin] = useState(false);
   const router = useRouter()
-  const { id, image } = router.query  
+  const { id, image } = router.query 
+  
+  async function login() {
+      const web3Modal = new Web3Modal()
+      await web3Modal.connect()
+      window.ethereum.request({method: 'eth_accounts'}).then((accounts)=> {
+        if(accounts.length)
+          setIsLogin(true)
+      })
+  }
 
   async function listNFTForSale() {
     const web3Modal = new Web3Modal()
@@ -26,8 +35,18 @@ export default function ResellNFT() {
     });
   }
 
+  useEffect(() => {
+    if(window.ethereum)
+      window.ethereum.request({method: 'eth_accounts'}).then(async (accounts)=> {
+        if(accounts.length)
+          setIsLogin(true)
+      })
+  },[])
+
+  if(isLogin) {
   return (
     <>
+    <div className="font-bold text-slate-500 rounded" style={{position:"absolute",left:"5px",top:"25px"}}>🟢</div>
     <div className="flex justify-center bg-slate-100">
       <div className="w-1/2 flex flex-col pb-12">
         {image && (
@@ -43,7 +62,18 @@ export default function ResellNFT() {
         </button>
       </div>
     </div>
-    <Footer />
     </>
-  )
+  )}
+  else {
+    return <div>
+      <div className='text-center'>
+        <div className='border shadow rounded-xl overflow-hidden m-auto mt-1' style={{width:"800px"}}>
+            <h1 className="px-20 py-2 text-2xl" style={{textAlign:"center",color:"red"}}>You are not connected to Metamask
+              <button className="m-auto mt-2 block bg-sky-400 hover:bg-sky-600 text-white py-1 px-4 rounded" onClick={login}> Connect</button>
+            </h1>
+            <div style={{position:"absolute",left:"5px",top:"25px"}} className="font-bold rounded hover:bg-teal-200">🔴</div>
+          </div>
+        </div>
+    </div>
+  }
 }

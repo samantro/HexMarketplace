@@ -3,30 +3,22 @@ import Web3Modal from 'web3modal';
 import {allNFTs} from '../salesforce/allNFTs'
 import { useEffect, useState } from 'react';
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import Footer from './footer';
-import LoaderComponent from './loader';
+import LoaderComponent from '../components/loader';
 
 
 export default function Home() {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLogin, setIsLogin] = useState(false);
-  var web3=false;
-  
+  const [metamask, setMetamask] = useState(false);
+
   async function login() {
-    // try {
-      // if(window.ethereum) {
-        setIsLogin(window.ethereum._state.accounts>0);
-        if(!isLogin){
-          const web3Modal = new Web3Modal()
-          const provider = await web3Modal.connect()
-          web3 = new Web3(provider)
-          setIsLogin(window.ethereum._state.accounts>0);
-        }
-      // }
-    // } catch(e) {
-      // alert('Rejected: Metamask Login')
-    // }
+    const web3Modal = new Web3Modal()
+    await web3Modal.connect()
+    window.ethereum.request({method: 'eth_accounts'}).then((accounts)=> {
+      if(accounts.length)
+        setIsLogin(true)
+    })
   }
 
   async function loadNFTs() {
@@ -44,6 +36,7 @@ export default function Home() {
       const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address);
       const accounts = await web3.eth.getAccounts();
       await marketPlaceContract.methods.buyNft(nft.tokenId).send({ from: accounts[0], value: nft.price })
+      loadNFTs()
     }
     else {
       alert("Please Connect to Metamask")
@@ -52,6 +45,14 @@ export default function Home() {
 
   useEffect(() => {
     loadNFTs()
+    if(window.ethereum) {
+      setMetamask(true);
+      window.ethereum.request({method: 'eth_accounts'}).then(async (accounts)=> {
+        if(accounts.length) {
+          setIsLogin(true)
+        }
+      })
+    }
   },[])
 
 if(loading) {
@@ -59,19 +60,28 @@ if(loading) {
 }
 else
   if(!nfts.length) {
-    return (<div><h1 className="px-20 py-10 text-3xl" style={{textAlign:"center",color:"grey"}}> No NFT available!</h1><Footer /></div>)
+    return (<div><h1 className="px-20 py-10 text-3xl" style={{textAlign:"center",color:"grey"}}> No NFT available!</h1></div>)
   } 
   else {
     return (
       <>
         <div className='text-center'>
           {(isLogin) ? 
-            <div className="font-bold text-slate-500 rounded" style={{position:"absolute",left:"410px",top:"30px"}}>🟢Connected</div>
+            <div className="font-bold text-slate-500 rounded" style={{position:"absolute",left:"5px",top:"25px"}}>🟢</div>
             :<div className='border shadow rounded-xl overflow-hidden m-auto mt-1' style={{width:"800px"}}>
-              <h1 className="px-20 py-2 text-2xl" style={{textAlign:"center",color:"red"}}>You are not connected to Metamask, Please
-                <div style={{display:"inline", color:"blue"}} onClick={login}> connect</div>
+              <h1 className="px-20 py-2 text-2xl" style={{textAlign:"center",color:"red"}}>
+                {
+                  (metamask) ? 
+                    <div>You are not connected to Metamask
+                      <button className="m-auto mt-2 block bg-sky-400 hover:bg-sky-600 text-white py-1 px-4 rounded" onClick={login}> Connect</button>
+                    </div>:
+                    <div>Please add
+                      <a className='hover:underline inline text-blue-700' target='_blank'
+                      href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn"> MetaMask </a> extension to your browser.
+                    </div>
+                }
               </h1>
-              <div style={{position:"absolute",left:"410px",top:"30px"}} className="font-bold rounded hover:bg-teal-200">🔴Connect</div>
+              <div style={{position:"absolute",left:"5px",top:"25px"}} className="font-bold rounded hover:bg-teal-200">🔴</div>
             </div>
           }
         </div>
@@ -97,7 +107,6 @@ else
             </div>
           </div>
         </div>
-        <Footer />
       </>
     )
   }

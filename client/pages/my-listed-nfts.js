@@ -2,31 +2,36 @@ import Web3 from 'web3';
 import Web3Modal from 'web3modal';
 import { useEffect, useState } from 'react';
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
-import Footer from './footer';
-import LoaderComponent from './loader';
+import LoaderComponent from '../components/loader';
+import { useRouter } from 'next/router'
 
 export default function CreatorDashboard() {
   const [nfts, setNfts] = useState([])
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
+  const [isLogin, setIsLogin] = useState(false)
+  const [metamask, setMetamask] = useState(false);
 
-  useEffect(() => { loadNFTs() }, [])
+  async function login() {
+      const web3Modal = new Web3Modal()
+      await web3Modal.connect()
+      window.ethereum.request({method: 'eth_accounts'}).then((accounts)=> {
+        if(accounts.length)
+          setIsLogin(true)
+      })
+  }
 
   async function loadNFTs() {
-    const web3Modal = new Web3Modal()
-    const provider = await web3Modal.connect()
-    const web3 = new Web3(provider)
-    const networkId = await web3.eth.net.getId()
-
-    // Get listed NFTs
-    const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
-    const accounts = await web3.eth.getAccounts()
-    const listings = await marketPlaceContract.methods.getMyListedNfts().call({from: accounts[0]})
-    
-    const nfts = await Promise.all(listings.map(async i => {
-      try {
+    if(isLogin) {
+      const web3Modal = new Web3Modal()
+      const provider = await web3Modal.connect()
+      const web3 = new Web3(provider)
+      const networkId = await web3.eth.net.getId()
+      const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address)
+      const accounts = await web3.eth.getAccounts()
+      const listings = await marketPlaceContract.methods.getMyListedNfts().call({from: accounts[0]})
+      const nfts = await Promise.all(listings.map(async i => {
         var meta = await  marketPlaceContract.methods.tokenURI(i.tokenId).call()
         meta = JSON.parse(meta);
-        
         let nft = {
           price: i.price,
           tokenId: i.tokenId,
@@ -36,27 +41,45 @@ export default function CreatorDashboard() {
           image: meta.image
         }
         return nft
-      } catch(err) {
-        console.log(err)
-        return null
-      }
-    }))
-    setNfts(nfts.filter(nft => nft !== null))
-    setLoading(false)
+      }))
+      setNfts(nfts.filter(nft => nft !== null))
+      setLoading(false)
+    }
+    else {
+      alert("Please Connect to Metamask")
+    }
   }
 
+  useEffect(() => {
+    if(window.ethereum) {
+      setMetamask(true);
+      window.ethereum.request({method: 'eth_accounts'}).then(async (accounts)=> {
+        if(accounts.length) {
+          setIsLogin(true)
+        }
+      })
+    }
+  },[])
+
+if(metamask) {
+if(isLogin) {
+  {loadNFTs()}
   if(loading) {
     return LoaderComponent();
   }
-  else
-  if (!nfts.length) {
-    return (<h1 className="px-20 py-10 text-3xl bg-slate-100" style={{textAlign:"center",color:"grey"}}> No NFT Listed!</h1>)
-  } else {
+  else if (!nfts.length) {
+    return (
+      <div>
+        <div className="font-bold text-slate-500 rounded" style={{position:"absolute",left:"5px",top:"25px"}}>🟢</div>
+        <h1 className="px-20 py-10 text-3xl bg-slate-100" style={{textAlign:"center",color:"grey"}}> No NFT Listed!</h1>
+      </div>)
+  } 
+  else {
     return (
       <>
+        <div className="font-bold text-slate-500 rounded" style={{position:"absolute",left:"5px",top:"25px"}}>🟢</div>
         <div className="p-4 bg-slate-100 pb-20">
-          {/* <h2 className="text-2xl py-2">Items Listed</h2> */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
             {
               nfts.map((nft, i) => (
                 <div key={i} className="border shadow rounded-xl overflow-hidden bg-white scale-95 hover:scale-105">
@@ -71,8 +94,35 @@ export default function CreatorDashboard() {
             }
           </div>
         </div>
-        <Footer />
       </>
     )
   }
+}
+else {
+  return <div>
+    <div className='text-center'>
+      <div className='border shadow rounded-xl overflow-hidden m-auto mt-1' style={{width:"800px"}}>
+          <h1 className="px-20 py-2 text-2xl" style={{textAlign:"center",color:"red"}}>You are not connected to Metamask
+            <button className="m-auto mt-2 block bg-sky-400 hover:bg-sky-600 text-white py-1 px-4 rounded" onClick={login}> Connect</button>
+          </h1>
+          <div style={{position:"absolute",left:"5px",top:"25px"}} className="font-bold rounded hover:bg-teal-200">🔴</div>
+        </div>
+      </div>
+  </div>
+}}
+else {
+  return <div>
+    <div className='text-center'>
+      <div className='border shadow rounded-xl overflow-hidden m-auto mt-1' style={{width:"800px"}}>
+          <h1 className="px-20 py-2 text-2xl" style={{textAlign:"center",color:"red"}}>
+            <div>Please add
+              <a className='hover:underline inline text-blue-700' target='_blank'
+              href="https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn"> MetaMask </a> extension to your browser.
+            </div>
+          </h1>
+          <div style={{position:"absolute",left:"5px",top:"25px"}} className="font-bold rounded hover:bg-teal-200">🔴</div>
+        </div>
+      </div>
+  </div>
+}
 }

@@ -1,14 +1,16 @@
 import '../styles/globals.css'
 import Link from 'next/link'
+import Footer from '../components/footer';
 
-function MyApp({ Component, pageProps }) {
-  const navCss = "hover:scale-110 hover:text-blue-600 text-xl mr-6 mt-2 text-blue-500 font-bold";
+function MyApp({ Component, props }) {
+  const navCss = "hover:scale-110 hover:text-blue-600 text-xl mr-6 mt-2 text-blue-500 font-bold"; 
+
   return (
     <div>
       <nav className="p-4">
         <div className="flex">
           <Link href="/">
-            <a className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-black">HEX NFTs Marketplace</a>
+            <a className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r ml-3 from-blue-600 to-black">HEX NFTs Marketplace</a>
           </Link>
           <Link href="/">
             <a className={`${navCss} ml-auto`}>
@@ -32,7 +34,8 @@ function MyApp({ Component, pageProps }) {
           </Link>
         </div>
       </nav>
-      <Component {...pageProps}/>
+      <Component {...props}/>
+      <Footer />
     </div>
   )
 }
