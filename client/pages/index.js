@@ -4,11 +4,13 @@ import {allNFTs} from '../salesforce/allNFTs'
 import { useEffect, useState } from 'react';
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
 import LoaderComponent from '../components/loader';
+import Modal from '../components/modal';
 
 
 export default function Home() {
   const [nfts, setNfts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [buyLoading, setBuyLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [metamask, setMetamask] = useState(false);
 
@@ -29,14 +31,19 @@ export default function Home() {
 
   async function buyNft(nft) {
     if(isLogin) {
+      setBuyLoading(true);
       const web3Modal = new Web3Modal()
       const provider = await web3Modal.connect()
       const web3 = new Web3(provider)
       const networkId = await web3.eth.net.getId();
       const marketPlaceContract = new web3.eth.Contract(Marketplace.abi, Marketplace.networks[networkId].address);
       const accounts = await web3.eth.getAccounts();
-      await marketPlaceContract.methods.buyNft(nft.tokenId).send({ from: accounts[0], value: nft.price })
-      loadNFTs()
+      marketPlaceContract.methods.buyNft(nft.tokenId).send({ from: accounts[0], value: nft.price }).then(()=> {
+        loadNFTs();
+      }).catch((e)=> {
+        alert(e.message);
+        setBuyLoading(false);
+      })
     }
     else {
       alert("Please Connect to Metamask")
@@ -106,6 +113,7 @@ else
             }
             </div>
           </div>
+          {buyLoading && Modal()}
         </div>
       </>
     )

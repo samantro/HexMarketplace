@@ -1,13 +1,14 @@
 import Web3 from 'web3'
-import axios from 'axios'
 import Web3Modal from 'web3modal'
 import { useRouter } from 'next/router'
+import Modal from '../components/modal'
 import { useEffect, useState } from 'react'
 import Marketplace from '../contracts/ethereum-contracts/Marketplace.json'
 
 export default function ResellNFT() {
   const [price,setPrice] = useState(0);
   const [isLogin, setIsLogin] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter()
   const { id, image } = router.query 
   
@@ -21,6 +22,11 @@ export default function ResellNFT() {
   }
 
   async function listNFTForSale() {
+    if(price<=0) {
+      alert('Price should be greater than 0.')
+      return;
+    }
+    setLoading(true);
     const web3Modal = new Web3Modal()
     const provider = await web3Modal.connect()
     const web3 = new Web3(provider)
@@ -31,8 +37,11 @@ export default function ResellNFT() {
     const accounts = await web3.eth.getAccounts()
     marketPlaceContract.methods.resellNft(id, Web3.utils.toWei(price, "ether"))
       .send({ from: accounts[0], value: listingFee }).on('receipt', function () {
-          router.push('/')
-    });
+        router.push('/')
+    }).on('error',(e)=>{
+      setLoading(false)
+      alert(e.message)
+    })
   }
 
   useEffect(() => {
@@ -61,6 +70,7 @@ export default function ResellNFT() {
           List NFT
         </button>
       </div>
+      {loading && Modal()}
     </div>
     </>
   )}
