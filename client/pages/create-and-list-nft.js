@@ -98,13 +98,17 @@ export default function CreateItem() {
     marketPlaceContract.methods.listNft(data, price)
     .send({ from: accounts[0], value: listingFee }).on('receipt', function () {
         console.log('listed')
-        router.push('/')
+        router.push('/my-listed-nfts')
     })
     .on('error', (err)=> {
       const msg = "MetaMask Tx Signature: User denied transaction signature.";
       if(err.message==msg) {
-        setLoading(false);
+        alert(msg);
       }
+      else {
+        alert('Transaction Failed: reverted by EVM')
+      }
+      setLoading(false);
     })
   }
 

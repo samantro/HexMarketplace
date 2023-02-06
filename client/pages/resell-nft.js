@@ -37,10 +37,17 @@ export default function ResellNFT() {
     const accounts = await web3.eth.getAccounts()
     marketPlaceContract.methods.resellNft(id, Web3.utils.toWei(price, "ether"))
       .send({ from: accounts[0], value: listingFee }).on('receipt', function () {
-        router.push('/')
-    }).on('error',(e)=>{
-      setLoading(false)
-      alert(e.message)
+        router.push('/my-listed-nfts')
+    }).catch((err)=> {
+      const msg = "MetaMask Tx Signature: User denied transaction signature.";
+      if(err.message==msg) {
+        alert(err.message);
+      }
+      else {
+        alert('Transaction Failed: reverted by EVM')
+        router.push('/');
+      }
+      setLoading(false);
     })
   }
 

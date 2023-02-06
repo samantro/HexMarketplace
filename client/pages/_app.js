@@ -19,17 +19,17 @@ function MyApp({ Component, props }) {
           </Link>
           <Link href="/create-and-list-nft">
             <a className={`${navCss} `}>
-              Create_NFT
+              Create
             </a>
           </Link>
           <Link href="/my-nfts">
-            <a className={`${navCss} `}>
-              My_NFTs
+            <a className={`${navCss} `} style={{wordSpacing:'-2px'}}>
+              My NFTs
             </a>
           </Link>
           <Link href="/my-listed-nfts">
-            <a className={`${navCss} `}>
-              My_Listed_NFTs
+            <a className={`${navCss} `} style={{wordSpacing:'-2px'}}>
+              Listed NFTs
             </a>
           </Link>
         </div>
