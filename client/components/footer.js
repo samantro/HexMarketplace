@@ -80,16 +80,10 @@ return (<footer className="text-center lg:text-left bg-white text-gray-600 mt-5"
           Useful links
         </h6>
         <p className="mb-4">
-          <a href="#!" className="text-gray-600">Pricing</a>
+          <a target='_blank' href="https://mumbaifaucet.com/" className="text-gray-600">Free Faucet</a>
         </p>
         <p className="mb-4">
-          <a href="#!" className="text-gray-600">Settings</a>
-        </p>
-        <p className="mb-4">
-          <a href="#!" className="text-gray-600">Orders</a>
-        </p>
-        <p>
-          <a href="#!" className="text-gray-600">Help</a>
+          <a target='_blank' href="https://medium.com/stakingbits/how-to-connect-polygon-mumbai-testnet-to-metamask-fc3487a3871f#936e" className="text-gray-600">Testnet</a>
         </p>
       </div>
       <div className="">
